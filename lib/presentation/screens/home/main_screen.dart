@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:xmash_app/presentation/screens/match/match_list_screen.dart';
 import 'package:xmash_app/presentation/widgets/common/main_app_bar.dart';
 import 'package:xmash_app/presentation/widgets/common/main_bottom_navigation_bar.dart';
+
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -16,7 +18,7 @@ class _MainScreenState extends State<MainScreen> {
     const Center(child: Text('랭킹')), //임시 객체들
     const Center(child: Text('토너먼트')),
     const Center(child: Text('매치 등록')),
-    const Center(child: Text('매치 기록')),
+    const MatchListScreen(),
   ];
 
   @override

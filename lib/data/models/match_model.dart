@@ -1,4 +1,4 @@
-import 'package:xmash_app/utils/date_utils.dart';
+import 'package:xmash_app/core/utils/date_utils.dart';
 
 class MatchModel {
   final int idx;

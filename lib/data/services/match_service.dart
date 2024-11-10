@@ -1,14 +1,15 @@
 import 'package:dio/dio.dart';
-import '../core/dio_client.dart';
-import '../models/match_model.dart';
+import 'package:xmash_app/data/core/dio_client.dart';
+import 'package:xmash_app/domain/entities/match_type.dart';
+import 'package:xmash_app/data/models/match_model.dart';
 
 class MatchService {
   final Dio _dio = DioClient.instance;
 
-  Future<List<MatchModel>> getMatches() async {
+  Future<List<MatchModel>> getMatches({required MatchType matchType}) async {
     try {
       final response = await _dio.get('/games', queryParameters: {
-        'matchType': 'all'
+        'matchType': matchType.value
       });
       
       if (response.statusCode == 200) {

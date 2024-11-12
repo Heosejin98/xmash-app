@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xmash_app/config/routes/app_pages.dart';
-import 'package:your_app/config/routes/app_routes.dart';
+import 'package:xmash_app/presentation/controllers/auth_controller.dart';
 
 class LoginScreen extends StatelessWidget {
+  final AuthController _authController = Get.put(AuthController());
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -99,7 +100,7 @@ class LoginScreen extends StatelessWidget {
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  // TODO: 로그인 로직 구현
+                  _authController.login(_usernameController.text, _passwordController.text); // 로그인 로직 호출
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0F1729),

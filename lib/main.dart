@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:intl/date_symbol_data_local.dart';
+import 'package:get/get.dart';
+import 'package:xmash_app/config/routes/app_pages.dart';
+import 'package:xmash_app/config/bindings/initial_binding.dart';
 import 'package:xmash_app/core/theme/app_colors.dart';
-import 'config/routes/app_routes.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main() {
-  initializeDateFormatting('ko_KR', null).then((_) => runApp(const MyApp()));
+void main() async {
+  // 로케일 데이터를 초기화합니다.
+  await initializeDateFormatting('ko_KR', null);
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Xmash',
       theme: ThemeData(
         primaryColor: AppColors.primary,
@@ -27,16 +31,9 @@ class MyApp extends StatelessWidget {
           primary: AppColors.primary,
         ),
       ),
+      initialBinding: InitialBinding(),
       initialRoute: AppRoutes.home,
-      routes: AppRoutes.routes,
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('ko', 'KR'),
-      ],
+      getPages: AppPages.pages,
     );
   }
 }

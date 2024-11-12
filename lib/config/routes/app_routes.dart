@@ -1,12 +1,7 @@
-import 'package:flutter/widgets.dart';
-import '../../presentation/screens/home/main_screen.dart';
-
-class AppRoutes {
-  static const String home = '/';
-  static const String profile = '/profile';
-  
-  static Map<String, WidgetBuilder> routes = {
-    home: (context) => const MainScreen(),
-    // profile: (context) => const ProfileScreen(),
-  };
+abstract class AppRoutes {
+  static const home = '/';
+  static const login = '/login';
+  static const profile = '/profile';
+  static const match = '/match';
+  // ... 다른 라우트 상수들
 } 

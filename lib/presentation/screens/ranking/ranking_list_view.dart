@@ -4,7 +4,7 @@ import 'package:xmash_app/data/services/ranking_service.dart';
 import 'package:xmash_app/domain/entities/ranking_type.dart';
 
 class RankingListView extends StatefulWidget {
-  final MatchType type; 
+  final MatchType type;
   const RankingListView({super.key, required this.type});
 
   @override
@@ -64,22 +64,74 @@ class _RankingListViewState extends State<RankingListView> {
       );
     }
 
-    return ListView.builder(
-      itemCount: ranking.length,
-      itemBuilder: (context, index) {
-        final rankingItem = ranking[index];
-        return ListTile(
-          title: Text(rankingItem.userName), 
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('LP: ${rankingItem.lp}'),
-              Text('Rank: ${rankingItem.rank}'), 
-              Text('Tier: ${rankingItem.tier}'),
+    return Column(
+      children: [
+        // 테이블 헤더
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          color: Colors.grey[200],
+          child: Row(
+            children: const [
+              Expanded(flex: 1, child: Text('순위', style: TextStyle(fontWeight: FontWeight.bold))),
+              Expanded(flex: 3, child: Text('이름', style: TextStyle(fontWeight: FontWeight.bold))),
+              Expanded(flex: 2, child: Text('티어', style: TextStyle(fontWeight: FontWeight.bold))),
+              Expanded(flex: 2, child: Text('LP', style: TextStyle(fontWeight: FontWeight.bold))),
             ],
           ),
-        );
-      },
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: ranking.length,
+            itemBuilder: (context, index) {
+              final rankingItem = ranking[index];
+              return Container(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey[300]!),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    // 순위
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        rankingItem.rank.toString(),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    // 이름
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        rankingItem.userName,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    // 티어
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        rankingItem.tier,
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                    // LP
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        rankingItem.lp.toString(),
+                        style: const TextStyle(color: Colors.blueAccent),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

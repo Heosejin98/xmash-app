@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:xmash_app/data/models/ranking_model.dart';
 import 'package:xmash_app/data/services/ranking_service.dart';
-import 'package:xmash_app/domain/entities/ranking_type.dart';
+import 'package:xmash_app/domain/entities/match_type.dart';
 
 class RankingListView extends StatefulWidget {
   final MatchType type;
@@ -70,8 +70,8 @@ class _RankingListViewState extends State<RankingListView> {
         Container(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           color: Colors.grey[200],
-          child: Row(
-            children: const [
+          child: const Row(
+            children: [
               Expanded(flex: 1, child: Text('순위', style: TextStyle(fontWeight: FontWeight.bold))),
               Expanded(flex: 3, child: Text('이름', style: TextStyle(fontWeight: FontWeight.bold))),
               Expanded(flex: 2, child: Text('티어', style: TextStyle(fontWeight: FontWeight.bold))),

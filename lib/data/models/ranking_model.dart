@@ -1,4 +1,3 @@
-import 'package:xmash_app/core/utils/date_utils.dart';
 
 class RankingModel {
   final String userId;

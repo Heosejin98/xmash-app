@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:xmash_app/domain/entities/ranking_type.dart';
+import 'package:xmash_app/domain/entities/match_type.dart';
 import 'package:xmash_app/presentation/screens/ranking/ranking_list_view.dart';
 
 class RankingTabView extends StatefulWidget {

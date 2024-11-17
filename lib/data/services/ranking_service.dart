@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:xmash_app/data/core/dio_client.dart';
-import 'package:xmash_app/domain/entities/ranking_type.dart';
 import 'package:xmash_app/data/models/ranking_model.dart';
+import 'package:xmash_app/domain/entities/match_type.dart';
 
 class RankingService {
   final Dio _dio = DioClient.instance;

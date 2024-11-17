@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:xmash_app/core/theme/app_colors.dart';
 import 'package:xmash_app/data/models/ranking_model.dart';
 import 'package:xmash_app/data/services/ranking_service.dart';
-import 'package:xmash_app/domain/entities/ranking_type.dart';
+import 'package:xmash_app/domain/entities/match_type.dart';
 import 'package:xmash_app/presentation/screens/ranking/ranking_tab_view.dart';
 
 class RankingListScreen extends StatefulWidget {
@@ -19,12 +19,12 @@ class _RankingListScreenState extends State<RankingListScreen> with SingleTicker
   bool isLoading = true;
   String? error;
   late TabController _tabController;
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(_handleTabSelection);
     _loadRanking();
 
@@ -45,14 +45,19 @@ class _RankingListScreenState extends State<RankingListScreen> with SingleTicker
     }
   }
 
-  Future<void> _loadRanking() async {
+  Future<void> _loadRanking([MatchType? type]) async {
     try {
       setState(() {
         isLoading = true;
         error = null;
       });
 
-      final matchType = _tabController.index == 0 ? MatchType.single : MatchType.double;
+      final matchType = type ?? switch (_tabController.index) {
+        0 => MatchType.single,
+        1 => MatchType.double,
+        _ => MatchType.double,
+      };
+
       final fetchedRanking = await _rankingService.getRanking(matchType: matchType);
 
       setState(() {
@@ -72,7 +77,7 @@ class _RankingListScreenState extends State<RankingListScreen> with SingleTicker
     final query = _searchController.text.toLowerCase();
     setState(() {
       filteredRanking = ranking.where((rankingItem) {
-        return rankingItem.userName.toLowerCase().contains(query); // 사용자 이름으로 필터링
+        return rankingItem.userName.toLowerCase().contains(query);
       }).toList();
     });
   }
@@ -99,20 +104,6 @@ class _RankingListScreenState extends State<RankingListScreen> with SingleTicker
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('랭킹 리스트'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: '단식'),
-            Tab(text: '복식'),
-          ],
-          labelColor: AppColors.primary,
-          unselectedLabelColor: Colors.grey[400],
-          indicatorColor: AppColors.primary,
-          indicatorWeight: 2,
-        ),
-      ),
       body: Column(
         children: [
           Padding(
@@ -135,6 +126,17 @@ class _RankingListScreenState extends State<RankingListScreen> with SingleTicker
                 ),
               ),
             ),
+          ),
+          TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(text: '단식'),
+              Tab(text: '복식'),
+            ],
+            labelColor: AppColors.primary,
+            unselectedLabelColor: Colors.grey[400],
+            indicatorColor: AppColors.primary,
+            indicatorWeight: 3,
           ),
           Expanded(
             child: RankingTabView(

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:xmash_app/data/models/game_result_request.dart';
+import 'package:xmash_app/data/services/match_service.dart';
+import 'package:xmash_app/domain/entities/match_type.dart';
 import 'player_select_screen.dart';
 
 class MatchRegisterScreen extends StatefulWidget {
@@ -9,11 +12,13 @@ class MatchRegisterScreen extends StatefulWidget {
 }
 
 class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
-  String? selectedType = '복식';
+  final MatchService _matchService = MatchService();
+  MatchType selectedMatchType = MatchType.double;
   List<String>? myTeamPlayers;
   List<String>? opponentPlayers;
   final TextEditingController _myTeamScoreController = TextEditingController();
   final TextEditingController _opponentTeamScoreController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -129,8 +134,8 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
                     context: context,
                     type: '단식',
                     icon: Icons.person,
-                    isSelected: selectedType == '단식',
-                    onTap: () => _handleTypeSelection('단식'),
+                    isSelected: selectedMatchType == MatchType.single,
+                    onTap: () => _handleTypeSelection(MatchType.single),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -139,53 +144,65 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
                     context: context,
                     type: '복식',
                     icon: Icons.people,
-                    isSelected: selectedType == '복식',
-                    onTap: () => _handleTypeSelection('복식'),
+                    isSelected: selectedMatchType == MatchType.double,
+                    onTap: () => _handleTypeSelection(MatchType.double),
                   ),
                 ),
               ],
             ),
-            if (selectedType != null) ...[
-              const SizedBox(height: 32),
-              _buildTeamSection(
-                context: context,
-                title: 'HOME TEAM',
-                players: myTeamPlayers,
-                onSelectPressed: () => _selectPlayers(true),
-                scoreController: _myTeamScoreController,
-              ),
-              const SizedBox(height: 24),
-              _buildTeamSection(
-                context: context,
-                title: 'AWAY TEAM',
-                players: opponentPlayers,
-                onSelectPressed: () => _selectPlayers(false),
-                scoreController: _opponentTeamScoreController,
-              ),
-            ],
+            const SizedBox(height: 32),
+            _buildTeamSection(
+              context: context,
+              title: 'HOME TEAM',
+              players: myTeamPlayers,
+              onSelectPressed: () => _selectPlayers(true),
+              scoreController: _myTeamScoreController,
+            ),
+            const SizedBox(height: 24),
+            _buildTeamSection(
+              context: context,
+              title: 'AWAY TEAM',
+              players: opponentPlayers,
+              onSelectPressed: () => _selectPlayers(false),
+              scoreController: _opponentTeamScoreController,
+            ),
           ],
         ),
       ),
-      bottomNavigationBar: selectedType != null
-          ? BottomAppBar(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ElevatedButton(
-                  onPressed: _canProceed() ? () {
-                    // TODO: 경기 등록 처리
-                  } : null,
-                  child: const Text('경기 등록하기'),
-                ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton(
+            // onPressed: _canProceed() ? _registerMatch : null,
+            onPressed: _registerMatch,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-            )
-          : null,
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.check),
+                SizedBox(width: 8),
+                Text(
+                  '경기 등록',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
-
-  Future<void> _handleTypeSelection(String type) async {
+  Future<void> _handleTypeSelection(MatchType type) async {
     setState(() {
-      selectedType = type;
+      selectedMatchType = type;
       myTeamPlayers = null;
       opponentPlayers = null;
     });
@@ -194,7 +211,7 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
   Future<void> _selectPlayers(bool isMyTeam) async {
     final result = await PlayerSelectBottomSheet.show(
       context: context,
-      isDoubles: selectedType == '복식',
+      isDoubles: selectedMatchType == MatchType.double,
       title: isMyTeam ? '우리팀 선수 선택' : '상대팀 선수 선택',
     );
 
@@ -210,7 +227,7 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
   }
 
   bool _canProceed() {
-    final requiredPlayers = selectedType == '복식' ? 2 : 1;
+    final requiredPlayers = selectedMatchType == MatchType.double ? 2 : 1;
     final hasValidScores = _myTeamScoreController.text.isNotEmpty && 
                           _opponentTeamScoreController.text.isNotEmpty;
     return myTeamPlayers?.length == requiredPlayers && 
@@ -256,5 +273,47 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _registerMatch() async {
+    try {
+      // 로딩 상태 표시
+      setState(() {
+        _isLoading = true;
+      });
+
+
+      GameResultRequest gameResultRequest = GameResultRequest(
+        homeTeam: myTeamPlayers!,
+        awayTeam: opponentPlayers!,
+        homeScore: int.parse(_myTeamScoreController.text),
+        awayScore: int.parse(_opponentTeamScoreController.text),
+        matchType: selectedMatchType,
+);
+      // 경기 등록 로직 구현
+      await MatchService().createMatch(gameResultReqeust: gameResultRequest);
+
+      // 성공 시 처리
+      if (mounted) {
+        Navigator.pop(context); // 이전 화면으로 돌아가기
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('경기가 성공적으로 등록되었습니다.')),
+        );
+      }
+    } catch (e) {
+      // 에러 처리
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('경기 등록 중 오류가 발생했습니다: ${e.toString()}')),
+        );
+      }
+    } finally {
+      // 로딩 상태 해제
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 } 

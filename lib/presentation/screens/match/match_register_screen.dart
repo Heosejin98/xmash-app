@@ -136,8 +136,8 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
                     context: context,
                     type: '단식',
                     icon: Icons.person,
-                    isSelected: selectedType == '단식',
-                    onTap: () => _handleTypeSelection('단식'),
+                    isSelected: selectedMatchType == MatchType.single,
+                    onTap: () => _handleTypeSelection(MatchType.single),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -146,30 +146,30 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
                     context: context,
                     type: '복식',
                     icon: Icons.people,
-                    isSelected: selectedType == '복식',
-                    onTap: () => _handleTypeSelection('복식'),
+                    isSelected: selectedMatchType == MatchType.double,
+                    onTap: () => _handleTypeSelection(MatchType.double),
                   ),
                 ),
               ],
             ),
-            if (selectedType != null) ...[
-              const SizedBox(height: 32),
-              _buildTeamSection(
-                context: context,
-                title: 'HOME TEAM',
-                players: myTeamPlayers,
-                onSelectPressed: () => _selectPlayers(true),
-                scoreController: _myTeamScoreController,
-              ),
-              const SizedBox(height: 24),
-              _buildTeamSection(
-                context: context,
-                title: 'AWAY TEAM',
-                players: opponentPlayers,
-                onSelectPressed: () => _selectPlayers(false),
-                scoreController: _opponentTeamScoreController,
-              ),
-            ],
+            ...[
+            const SizedBox(height: 32),
+            _buildTeamSection(
+              context: context,
+              title: 'HOME TEAM',
+              players: myTeamPlayers,
+              onSelectPressed: () => _selectPlayers(true),
+              scoreController: _myTeamScoreController,
+            ),
+            const SizedBox(height: 24),
+            _buildTeamSection(
+              context: context,
+              title: 'AWAY TEAM',
+              players: opponentPlayers,
+              onSelectPressed: () => _selectPlayers(false),
+              scoreController: _opponentTeamScoreController,
+            ),
+          ],
           ],
         ),
       ),
@@ -210,7 +210,7 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
 
   Future<void> _handleTypeSelection(MatchType type) async {
     setState(() {
-      selectedType = type;
+      selectedMatchType = type;
       myTeamPlayers = null;
       opponentPlayers = null;
     });

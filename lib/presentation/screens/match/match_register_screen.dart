@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:xmash_app/data/models/game_result_request.dart';
+import 'package:xmash_app/data/models/user_model.dart';
+import 'package:xmash_app/data/services/match_service.dart';
+import 'package:xmash_app/domain/entities/match_type.dart';
 import 'player_select_screen.dart';
 
 class MatchRegisterScreen extends StatefulWidget {
   const MatchRegisterScreen({super.key});
+  
 
   @override
   State<MatchRegisterScreen> createState() => _MatchRegisterScreenState();
 }
 
 class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
-  String? selectedType = '복식';
-  List<String>? myTeamPlayers;
-  List<String>? opponentPlayers;
+  bool _isLoading = false;
+  final MatchService _matchService = MatchService();
+  MatchType selectedMatchType = MatchType.double;
+  List<UserModel>? myTeamPlayers;
+  List<UserModel>? opponentPlayers;
   final TextEditingController _myTeamScoreController = TextEditingController();
   final TextEditingController _opponentTeamScoreController = TextEditingController();
 
@@ -25,7 +32,7 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
   Widget _buildTeamSection({
     required BuildContext context,
     required String title,
-    required List<String>? players,
+    required List<UserModel>? players,
     required VoidCallback onSelectPressed,
     required TextEditingController scoreController,
   }) {
@@ -51,7 +58,7 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
                 child: players == null || players.isEmpty
                     ? TextButton(
                         onPressed: onSelectPressed,
-                        child: Text('${title} 선수 선택하기'),
+                        child: Text('$title 선수 선택하기'),
                       )
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,8 +67,8 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
                             spacing: 8,
                             children: players
                                 .map((player) => Chip(
-                                      label: Text(player),
-                                    ))
+                                      label: Text(player.userName),
+                                ))
                                 .toList(),
                           ),
                           TextButton(
@@ -166,24 +173,42 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: selectedType != null
-          ? BottomAppBar(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ElevatedButton(
-                  onPressed: _canProceed() ? () {
-                    // TODO: 경기 등록 처리
-                  } : null,
-                  child: const Text('경기 등록하기'),
-                ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton(
+            // onPressed: _canProceed() ? _registerMatch : null,
+            onPressed: _registerMatch,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-            )
-          : null,
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.check),
+                SizedBox(width: 8),
+                Text(
+                   '경기 등록',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white, // 글자 색상을 흰색으로 변경
+                    ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
-
-  Future<void> _handleTypeSelection(String type) async {
+  Future<void> _handleTypeSelection(MatchType type) async {
     setState(() {
       selectedType = type;
       myTeamPlayers = null;
@@ -194,8 +219,8 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
   Future<void> _selectPlayers(bool isMyTeam) async {
     final result = await PlayerSelectBottomSheet.show(
       context: context,
-      isDoubles: selectedType == '복식',
-      title: isMyTeam ? '우리팀 선수 선택' : '상대팀 선수 선택',
+      isDoubles: selectedMatchType == MatchType.double,
+      title: isMyTeam ? 'HOMETEAM 선수 선택' : 'AWAYTEAM 선수 선택',
     );
 
     if (result != null) {
@@ -209,14 +234,6 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
     }
   }
 
-  bool _canProceed() {
-    final requiredPlayers = selectedType == '복식' ? 2 : 1;
-    final hasValidScores = _myTeamScoreController.text.isNotEmpty && 
-                          _opponentTeamScoreController.text.isNotEmpty;
-    return myTeamPlayers?.length == requiredPlayers && 
-           opponentPlayers?.length == requiredPlayers &&
-           hasValidScores;
-  }
 
   Widget _buildTypeButton({
     required BuildContext context,
@@ -256,5 +273,46 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _registerMatch() async {
+    try {
+      // 로딩 상태 표시
+      setState(() {
+        _isLoading = true;
+      });
+
+      GameResultRequest gameResultRequest = GameResultRequest(
+        homeTeam: myTeamPlayers!.map((player) => player.userId).toList(),
+        awayTeam: opponentPlayers!.map((player) => player.userId).toList(),
+        homeScore: int.parse(_myTeamScoreController.text),
+        awayScore: int.parse(_opponentTeamScoreController.text),
+        matchType: selectedMatchType,
+      );
+      // 경기 등록 로직 구현
+      await _matchService.createMatch(gameResultReqeust: gameResultRequest);
+
+      // 성공 시 처리ㄱ
+      if (mounted) {
+        Navigator.pop(context); // 이전 화면으로 돌아가기
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('경기가 성공적으로 등록되었습니다.')),
+        );
+      }
+    } catch (e) {
+      // 에러 처리
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('경기 등록 중 오류가 발생했습니다: ${e.toString()}')),
+        );
+      }
+    } finally {
+      // 로딩 상태 해제
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 } 

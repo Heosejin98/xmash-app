@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:xmash_app/data/services/user_service.dart';
+import 'package:xmash_app/data/models/user_model.dart';
 
 class PlayerSelectBottomSheet extends StatefulWidget {
   final bool isDoubles;
   final String title;
+  final UserService _user_model;
 
-  const PlayerSelectBottomSheet({
+  PlayerSelectBottomSheet({
     super.key,
     required this.isDoubles,
     required this.title,
-  });
+  }) : _user_model = UserService();
 
-  static Future<List<String>?> show({
+  static Future<List<UserModel>?> show({
     required BuildContext context,
     required bool isDoubles,
     required String title,
   }) {
-    return showModalBottomSheet<List<String>>(
+    return showModalBottomSheet<List<UserModel>>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -40,15 +43,25 @@ class PlayerSelectBottomSheet extends StatefulWidget {
 
 class _PlayerSelectBottomSheetState extends State<PlayerSelectBottomSheet> {
   final TextEditingController _searchController = TextEditingController();
-  final List<String> selectedPlayers = [];
+    final List<UserModel> selectedPlayers2 = [];
+  List<UserModel> players = [];
 
-  final List<Map<String, String>> players = [
-    {'name': '김준영', 'tier': 'GOLD'},
-    {'name': '김태윤', 'tier': 'GOLD'},
-    {'name': 'Geust1', 'tier': 'GOLD'},
-    {'name': '고예랑', 'tier': 'GOLD'},
-    {'name': '김진범', 'tier': 'GOLD'},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchPlayers();
+  }
+
+  Future<void> _fetchPlayers() async {
+    try {
+      players = await widget._user_model.fetchUsers();
+      setState(() {});
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +109,7 @@ class _PlayerSelectBottomSheetState extends State<PlayerSelectBottomSheet> {
                 bottom: BorderSide(color: Colors.grey[300]!),
               ),
             ),
-            child: selectedPlayers.isEmpty
+            child: selectedPlayers2.isEmpty
                 ? Text(
                     '선수를 선택해주세요',
                     style: TextStyle(color: Colors.grey[600]),
@@ -104,16 +117,16 @@ class _PlayerSelectBottomSheetState extends State<PlayerSelectBottomSheet> {
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ...selectedPlayers.map((player) => Padding(
+                      ...selectedPlayers2.map((player) => Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4),
                             child: Row(
                               children: [
                                 CircleAvatar(
-                                  child: Text(player[0]),
+                                  child: Text(player.userName[0]),
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
-                                  player,
+                                  player.userName,
                                   style: Theme.of(context).textTheme.titleMedium,
                                 ),
                                 const Spacer(),
@@ -121,7 +134,7 @@ class _PlayerSelectBottomSheetState extends State<PlayerSelectBottomSheet> {
                                   icon: const Icon(Icons.close),
                                   onPressed: () {
                                     setState(() {
-                                      selectedPlayers.remove(player);
+                                      selectedPlayers2.remove(player);
                                     });
                                   },
                                 ),
@@ -149,59 +162,61 @@ class _PlayerSelectBottomSheetState extends State<PlayerSelectBottomSheet> {
           ),
           // 선수 목록
           Expanded(
-            child: ListView.builder(
-              itemCount: players.length,
-              itemBuilder: (context, index) {
-                final player = players[index];
-                final isSelected = selectedPlayers.contains(player['name']);
-                
-                return ListTile(
-                  leading: CircleAvatar(
-                    child: Text(player['name']?[0] ?? ''),
+            child: players.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    itemCount: players.length,
+                    itemBuilder: (context, index) {
+                      final player = players[index];
+                      final isSelected = selectedPlayers2.contains(player);
+                      
+                      return ListTile(
+                        leading: CircleAvatar(
+                          child: Text(player.userName[0]),
+                        ),
+                        title: Text(player.userName),
+                        subtitle: Text(player.userId),
+                        trailing: isSelected
+                            ? Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                                child: const Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              )
+                            : null,
+                        onTap: () {
+                          setState(() {
+                            if (isSelected) {
+                              selectedPlayers2.remove(player);
+                            } else {
+                              if (selectedPlayers2.length < (widget.isDoubles ? 2 : 1)) {
+                                selectedPlayers2.add(player);
+                              }
+                            }
+                          });
+                        },
+                      );
+                    },
                   ),
-                  title: Text(player['name'] ?? ''),
-                  subtitle: Text(player['tier'] ?? ''),
-                  trailing: isSelected
-                      ? Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                          child: const Icon(
-                            Icons.check,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        )
-                      : null,
-                  onTap: () {
-                    setState(() {
-                      if (isSelected) {
-                        selectedPlayers.remove(player['name']);
-                      } else {
-                        if (selectedPlayers.length < (widget.isDoubles ? 2 : 1)) {
-                          selectedPlayers.add(player['name'] ?? '');
-                        }
-                      }
-                    });
-                  },
-                );
-              },
-            ),
           ),
           // 하단 버튼
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
-              onPressed: selectedPlayers.length == (widget.isDoubles ? 2 : 1)
+              onPressed: selectedPlayers2.length == (widget.isDoubles ? 2 : 1)
                   ? () {
-                      Navigator.pop(context, selectedPlayers);
+                      Navigator.pop(context, selectedPlayers2);
                     }
                   : null,
               child: Text(
                 widget.isDoubles 
-                    ? '${selectedPlayers.length}/2명 선택완료'
+                    ? '${selectedPlayers2.length}/2명 선택완료'
                     : '선택 완료'
               ),
             ),

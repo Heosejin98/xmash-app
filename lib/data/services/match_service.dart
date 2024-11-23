@@ -40,11 +40,12 @@ class MatchService {
     }
   }
 
-  Future<void> createMatch({required GameResultRequest gameResultReqeust}) async {
+  Future<void> createMatch({required GameResultRequest gameResultRequest}) async {
     try {
-      final response = await _dio.post('/games', data: gameResultReqeust.toJson());
+      final response = await _dio.post('/games', data: gameResultRequest.toJson());
+      
 
-      if (response.statusCode != 201) {
+      if (response.statusCode != 200) {
         throw DioException(
           requestOptions: response.requestOptions,
           message: '매치 생성에 실패했습니다.',

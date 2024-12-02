@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:xmash_app/data/models/game_result_request.dart';
 import 'package:xmash_app/data/models/user_model.dart';
 import 'package:xmash_app/data/services/match_service.dart';
 import 'package:xmash_app/domain/entities/match_type.dart';
+import 'package:xmash_app/presentation/controllers/score_controller.dart';
 import 'player_select_screen.dart';
 
 class MatchRegisterScreen extends StatefulWidget {
@@ -14,19 +16,124 @@ class MatchRegisterScreen extends StatefulWidget {
 }
 
 class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
-  bool _isLoading = false;
   final MatchService _matchService = MatchService();
+  final ScoreController _scoreController = Get.put(ScoreController());
+
   MatchType selectedMatchType = MatchType.double;
-  List<UserModel>? myTeamPlayers;
-  List<UserModel>? opponentPlayers;
-  final TextEditingController _myTeamScoreController = TextEditingController();
-  final TextEditingController _opponentTeamScoreController = TextEditingController();
+  List<UserModel>? homeTeamPlayers;
+  List<UserModel>? awayTeamPlayers;
+  var isRegisterButtonEnabled = false.obs;
 
   @override
-  void dispose() {
-    _myTeamScoreController.dispose();
-    _opponentTeamScoreController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    ever(_scoreController.homeScore, (_) => _updateRegisterButtonState());
+    ever(_scoreController.awayScore, (_) => _updateRegisterButtonState());
+  }
+
+  void _updateRegisterButtonState() {
+    isRegisterButtonEnabled.value = homeTeamPlayers != null && homeTeamPlayers!.isNotEmpty &&
+                                    awayTeamPlayers != null && awayTeamPlayers!.isNotEmpty &&
+                                    (_scoreController.getHomeScore() >= 11 || _scoreController.getAwayScore() >= 11);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16),
+            Text(
+              '경기 타입',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '경기 타입을 선택해 주세요',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildTypeButton(
+                    context: context,
+                    type: '단식',
+                    icon: Icons.person,
+                    isSelected: selectedMatchType == MatchType.single,
+                    onTap: () => _handleTypeSelection(MatchType.single),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildTypeButton(
+                    context: context,
+                    type: '복식',
+                    icon: Icons.people,
+                    isSelected: selectedMatchType == MatchType.double,
+                    onTap: () => _handleTypeSelection(MatchType.double),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            _buildTeamSection(
+              context: context,
+              title: 'HOME TEAM',
+              players: homeTeamPlayers,
+              onSelectPressed: () => _selectPlayers(true),
+              scoreController: _scoreController.awayScoreTextEditer,
+              isHomeTeam: true,
+            ),
+            const SizedBox(height: 24),
+            _buildTeamSection(
+              context: context,
+              title: 'AWAY TEAM',
+              players: awayTeamPlayers,
+              onSelectPressed: () => _selectPlayers(false),
+              scoreController: _scoreController.homeScoreTextEditer,
+              isHomeTeam: false,
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: Obx(() => ElevatedButton(
+            onPressed: isRegisterButtonEnabled.value ? _registerMatch : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.check),
+                SizedBox(width: 8),
+                Text(
+                  '경기 등록',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          )),
+        ),
+      ),
+    );
   }
 
   Widget _buildTeamSection({
@@ -35,6 +142,7 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
     required List<UserModel>? players,
     required VoidCallback onSelectPressed,
     required TextEditingController scoreController,
+    required bool isHomeTeam,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,18 +194,24 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: TextField(
-                    controller: scoreController,
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    decoration: const InputDecoration(
-                      hintText: 'Score',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 12,
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: scoreController, // 홈 팀 점수 컨트롤러
+                        decoration: const InputDecoration(
+                          hintText: 'Score',
+                        ),
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        onChanged: (value) {
+                          if (isHomeTeam) {
+                            _scoreController.updateHomeScore(value);
+                          } else {
+                            _scoreController.updateAwayScore(value);
+                          }
+                        },
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ),
@@ -108,111 +222,11 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            Text(
-              '경기 타입',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '경기 타입을 선택해 주세요',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTypeButton(
-                    context: context,
-                    type: '단식',
-                    icon: Icons.person,
-                    isSelected: selectedMatchType == MatchType.single,
-                    onTap: () => _handleTypeSelection(MatchType.single),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTypeButton(
-                    context: context,
-                    type: '복식',
-                    icon: Icons.people,
-                    isSelected: selectedMatchType == MatchType.double,
-                    onTap: () => _handleTypeSelection(MatchType.double),
-                  ),
-                ),
-              ],
-            ),
-            ...[
-            const SizedBox(height: 32),
-            _buildTeamSection(
-              context: context,
-              title: 'HOME TEAM',
-              players: myTeamPlayers,
-              onSelectPressed: () => _selectPlayers(true),
-              scoreController: _myTeamScoreController,
-            ),
-            const SizedBox(height: 24),
-            _buildTeamSection(
-              context: context,
-              title: 'AWAY TEAM',
-              players: opponentPlayers,
-              onSelectPressed: () => _selectPlayers(false),
-              scoreController: _opponentTeamScoreController,
-            ),
-          ],
-          ],
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: ElevatedButton(
-            // onPressed: _canProceed() ? _registerMatch : null,
-            onPressed: _registerMatch,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.check),
-                SizedBox(width: 8),
-                Text(
-                   '경기 등록',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white, // 글자 색상을 흰색으로 변경
-                    ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Future<void> _handleTypeSelection(MatchType type) async {
     setState(() {
       selectedMatchType = type;
-      myTeamPlayers = null;
-      opponentPlayers = null;
+      homeTeamPlayers = null;
+      awayTeamPlayers = null;
     });
   }
 
@@ -226,14 +240,47 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
     if (result != null) {
       setState(() {
         if (isMyTeam) {
-          myTeamPlayers = result;
+          homeTeamPlayers = result;
         } else {
-          opponentPlayers = result;
+          awayTeamPlayers = result;
         }
       });
     }
   }
 
+  Future<void> _registerMatch() async {
+    try {
+
+      int homeScore = _scoreController.getHomeScore();
+      int awayScore = _scoreController.getAwayScore();
+
+      GameResultRequest gameResultRequest = GameResultRequest(
+        homeTeam: homeTeamPlayers!.map((player) => player.userId).toList(),
+        awayTeam: awayTeamPlayers!.map((player) => player.userId).toList(),
+        homeScore: homeScore,
+        awayScore: awayScore,
+        matchType: selectedMatchType,
+      );
+
+      await _matchService.createMatch(gameResultRequest: gameResultRequest);
+    
+      if (mounted) {
+        setState(() {
+          // 점수 초기화
+          _scoreController.clear();
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('경기가 성공적으로 등록되었습니다.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('경기 등록 중 오류가 발생했습니다: ${e.toString()}')),
+        );
+      }
+    } 
+  }
 
   Widget _buildTypeButton({
     required BuildContext context,
@@ -273,46 +320,5 @@ class _MatchRegisterScreenState extends State<MatchRegisterScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _registerMatch() async {
-    try {
-      // 로딩 상태 표시
-      setState(() {
-        _isLoading = true;
-      });
-
-      GameResultRequest gameResultRequest = GameResultRequest(
-        homeTeam: myTeamPlayers!.map((player) => player.userId).toList(),
-        awayTeam: opponentPlayers!.map((player) => player.userId).toList(),
-        homeScore: int.parse(_myTeamScoreController.text),
-        awayScore: int.parse(_opponentTeamScoreController.text),
-        matchType: selectedMatchType,
-      );
-      // 경기 등록 로직 구현
-      await _matchService.createMatch(gameResultReqeust: gameResultRequest);
-
-      // 성공 시 처리ㄱ
-      if (mounted) {
-        Navigator.pop(context); // 이전 화면으로 돌아가기
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('경기가 성공적으로 등록되었습니다.')),
-        );
-      }
-    } catch (e) {
-      // 에러 처리
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('경기 등록 중 오류가 발생했습니다: ${e.toString()}')),
-        );
-      }
-    } finally {
-      // 로딩 상태 해제
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
   }
 } 

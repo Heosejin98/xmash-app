@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:xmash_app/config/routes/app_pages.dart';
+import 'package:xmash_app/routes/app_pages.dart';
 import 'package:xmash_app/config/bindings/initial_binding.dart';
 import 'package:xmash_app/core/theme/app_colors.dart';
 import 'package:intl/date_symbol_data_local.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:xmash_app/config/routes/app_pages.dart';
+import 'package:xmash_app/routes/app_pages.dart';
 import 'package:xmash_app/ui/controllers/auth_controller.dart';
 
 class LoginScreen extends StatelessWidget {

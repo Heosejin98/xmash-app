@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:xmash_app/domain/entities/match_type.dart';
-import 'package:xmash_app/presentation/screens/match/match_list_view.dart';
+import 'package:xmash_app/core/type/match_type.dart';
+import 'package:xmash_app/ui/screens/match/match_list_view.dart';
 
 class MatchTabView extends StatefulWidget {
   final TabController controller;

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:xmash_app/core/theme/app_colors.dart';
-import 'package:xmash_app/data/models/match_model.dart';
-import 'package:xmash_app/data/services/match_service.dart';
-import 'package:xmash_app/domain/entities/match_type.dart';
-import 'package:xmash_app/presentation/screens/match/match_tab_view.dart';
+import 'package:xmash_app/models/match_model.dart';
+import 'package:xmash_app/domain/match_service.dart';
+import 'package:xmash_app/core/type/match_type.dart';
+import 'package:xmash_app/ui/screens/match/match_tab_view.dart';
 
 class MatchListScreen extends StatefulWidget {
   const MatchListScreen({super.key});

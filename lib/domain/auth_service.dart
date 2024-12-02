@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:xmash_app/data/core/dio_client.dart';
+import 'package:xmash_app/config/dio_client.dart';
 
 class AuthService {
   final Dio _dio = DioClient.instance;

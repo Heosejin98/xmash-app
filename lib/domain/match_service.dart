@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:xmash_app/data/core/dio_client.dart';
-import 'package:xmash_app/data/models/game_result_request.dart';
-import 'package:xmash_app/domain/entities/match_type.dart';
-import 'package:xmash_app/data/models/match_model.dart';
+import 'package:xmash_app/config/dio_client.dart';
+import 'package:xmash_app/models/game_result_request.dart';
+import 'package:xmash_app/core/type/match_type.dart';
+import 'package:xmash_app/models/match_model.dart';
 
 class MatchService {
   final Dio _dio = DioClient.instance;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:xmash_app/data/models/ranking_model.dart';
-import 'package:xmash_app/data/services/ranking_service.dart';
-import 'package:xmash_app/domain/entities/match_type.dart';
+import 'package:xmash_app/models/ranking_model.dart';
+import 'package:xmash_app/domain/ranking_service.dart';
+import 'package:xmash_app/core/type/match_type.dart';
 
 class RankingListView extends StatefulWidget {
   final MatchType type;

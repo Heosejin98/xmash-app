@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:xmash_app/data/services/user_service.dart';
-import 'package:xmash_app/data/models/user_model.dart';
+import 'package:xmash_app/domain/user_service.dart';
+import 'package:xmash_app/models/user_model.dart';
 
 class PlayerSelectBottomSheet extends StatefulWidget {
   final bool isDoubles;

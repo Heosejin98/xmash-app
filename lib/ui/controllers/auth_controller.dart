@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:xmash_app/data/services/auth_service.dart';
+import 'package:xmash_app/domain/auth_service.dart';
 
 class AuthController extends GetxController {
   static AuthController get to => Get.find();

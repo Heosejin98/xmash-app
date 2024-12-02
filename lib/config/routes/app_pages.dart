@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import '../../presentation/screens/home/main_screen.dart';
-import '../../presentation/screens/auth/login_screen.dart';
+import '../../ui/screens/home/main_screen.dart';
+import '../../ui/screens/auth/login_screen.dart';
 
 abstract class AppRoutes {
   static const String home = '/';

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:xmash_app/presentation/screens/match/match_list_screen.dart';
-import 'package:xmash_app/presentation/screens/ranking/ranking_list_screen.dart';
-import 'package:xmash_app/presentation/screens/match/match_register_screen.dart';
-import 'package:xmash_app/presentation/widgets/common/main_app_bar.dart';
-import 'package:xmash_app/presentation/widgets/common/main_bottom_navigation_bar.dart';
+import 'package:xmash_app/ui/screens/match/match_list_screen.dart';
+import 'package:xmash_app/ui/screens/ranking/ranking_list_screen.dart';
+import 'package:xmash_app/ui/screens/match/match_register_screen.dart';
+import 'package:xmash_app/ui/widgets/common/main_app_bar.dart';
+import 'package:xmash_app/ui/widgets/common/main_bottom_navigation_bar.dart';
 
 
 class MainScreen extends StatefulWidget {

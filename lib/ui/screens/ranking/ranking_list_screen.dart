@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:xmash_app/core/theme/app_colors.dart';
-import 'package:xmash_app/data/models/ranking_model.dart';
-import 'package:xmash_app/data/services/ranking_service.dart';
-import 'package:xmash_app/domain/entities/match_type.dart';
-import 'package:xmash_app/presentation/screens/ranking/ranking_tab_view.dart';
+import 'package:xmash_app/models/ranking_model.dart';
+import 'package:xmash_app/domain/ranking_service.dart';
+import 'package:xmash_app/core/type/match_type.dart';
+import 'package:xmash_app/ui/screens/ranking/ranking_tab_view.dart';
 
 class RankingListScreen extends StatefulWidget {
   const RankingListScreen({super.key});

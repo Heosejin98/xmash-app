@@ -1,4 +1,4 @@
-import 'package:xmash_app/domain/entities/match_type.dart';
+import 'package:xmash_app/core/type/match_type.dart';
 
 class GameResultRequest {
   final List<String> homeTeam;

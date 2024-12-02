@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:xmash_app/data/models/game_result_request.dart';
-import 'package:xmash_app/data/models/user_model.dart';
-import 'package:xmash_app/data/services/match_service.dart';
-import 'package:xmash_app/domain/entities/match_type.dart';
-import 'package:xmash_app/presentation/controllers/score_controller.dart';
+import 'package:xmash_app/models/game_result_request.dart';
+import 'package:xmash_app/models/user_model.dart';
+import 'package:xmash_app/domain/match_service.dart';
+import 'package:xmash_app/core/type/match_type.dart';
+import 'package:xmash_app/ui/controllers/score_controller.dart';
 import 'player_select_screen.dart';
 
 class MatchRegisterScreen extends StatefulWidget {

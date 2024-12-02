@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:xmash_app/data/core/dio_client.dart';
-import 'package:xmash_app/data/models/user_model.dart';
+import 'package:xmash_app/config/dio_client.dart';
+import 'package:xmash_app/models/user_model.dart';
 
 class UserService {
   final Dio _dio = DioClient.instance;

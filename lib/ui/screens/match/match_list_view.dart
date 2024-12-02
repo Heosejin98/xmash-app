@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:xmash_app/data/models/match_model.dart';
-import 'package:xmash_app/data/services/match_service.dart';
-import 'package:xmash_app/domain/entities/match_type.dart';
+import 'package:xmash_app/models/match_model.dart';
+import 'package:xmash_app/domain/match_service.dart';
+import 'package:xmash_app/core/type/match_type.dart';
 
 class MatchListView extends StatefulWidget {
   final MatchType type;

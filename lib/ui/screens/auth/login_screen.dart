@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:xmash_app/routes/app_pages.dart';
+
+import 'package:xmash_app/ui/screens/auth/auth_title.dart';
+import 'package:xmash_app/ui/screens/auth/input_email.dart';
+import 'package:xmash_app/ui/screens/auth/input_password.dart';
 import 'package:xmash_app/ui/controllers/auth_controller.dart';
+import 'package:xmash_app/ui/screens/auth/login_state_checkbox.dart';
+import 'package:xmash_app/ui/screens/auth/find_my_password.dart';
+import 'package:xmash_app/ui/screens/auth/email_login_button.dart';
+import 'package:xmash_app/ui/screens/auth/or_divider.dart';
+import 'package:xmash_app/ui/screens/auth/signup_section.dart';
+import 'package:xmash_app/ui/screens/auth/social_login_button_section.dart';
 
 class LoginScreen extends StatelessWidget {
   final AuthController _authController = Get.put(AuthController());
@@ -20,106 +29,35 @@ class LoginScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 16),
-            IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => Get.offAllNamed(AppRoutes.home),
+            const AuthTitle(),
+            InputEmail(controller: _usernameController),
+            const SizedBox(height: 24),
+            InputPassword(controller: _passwordController),
+            const SizedBox(height: 12),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                LoginStateCheckbox(),
+                FindMyPassword(),
+              ],
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Login',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 40),
-            const Text(
-              'Username',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _usernameController,
-              decoration: InputDecoration(
-                hintText: 'username',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.blue),
-                ),
-              ),
+            EmailLoginButton(
+              authController: _authController,
+              usernameController: _usernameController,
+              passwordController: _passwordController,
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Password',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                hintText: 'password',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.blue),
-                ),
-              ),
-            ),
+            const OrDivider(),
             const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () {
-                  _authController.login(_usernameController.text, _passwordController.text); // 로그인 로직 호출
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0F1729),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text(
-                  'Submit',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
+            const SocialLoginButtonSection(),
+            const SizedBox(height: 24),
+            const SignUpSection(),
           ],
         ),
       ),
     );
   }
-} 
+}
